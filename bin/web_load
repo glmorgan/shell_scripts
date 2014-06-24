@@ -93,9 +93,17 @@ while [[ $# -gt 0 ]]; do
             then
                 load_url "$GITHUB_BRANCH_BASE_URL/$2"
             else
-                usage
-                echo "Branch required!"
+                CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+                if [[ ! -z $CURRENT_BRANCH ]]
+                then
+                    load_url "$GITHUB_BRANCH_BASE_URL/$CURRENT_BRANCH"
+                else
+                    echo "Branch required!"
+                fi
             fi
+            exit
+            ;;
+
     esac
     shift
 done
