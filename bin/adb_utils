@@ -1,0 +1,46 @@
+#!/bin/bash
+
+## Author: Glen Morgan (glen.morgan@outlook.com)
+## Date: June 24th, 2014
+## Usage: adb_utils [option] arg 
+## Desc: A couple utility commands that I tend to use often.
+
+PACKAGE_FILTER="aio"
+
+function usage() {
+    echo "Usage: $0"
+    echo ""
+    echo ""
+    echo "Options:"
+    echo ""
+    echo "   -h, --help     Display this message."
+    echo ""
+    echo "   -p, --package  Locate installed packages on connected Android device"
+    echo "                  param: package filter"
+    echo "                  Note: If no param is supplied, the script will display all the \"$PACKAGE_FILTER\" packages."
+    echo "                  adb_utils -p launcher"
+    echo ""
+    echo ""
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            exit
+            ;;
+        -p|-package)
+            if [[ ! -z $2 ]]
+            then
+                PACKAGE_FILTER=$2
+            fi
+                echo "Executing command"
+                echo "\"adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2-\""
+                echo ""
+                adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2- 
+                echo ""
+            exit
+            ;;
+    esac
+    shift
+done
