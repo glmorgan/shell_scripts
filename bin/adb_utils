@@ -28,6 +28,13 @@ function usage() {
     echo "                  \"$SCREEN_CAPTURE_FILENAME.$SCREEN_CAPTURE_EXTENSION\""
     echo "                  adb_utils -c image.png"
     echo ""
+    echo "   -l, --log      Tail log files"
+    echo "                  param: filter expression"
+    echo "                  Note: If no param is supplied, all log entries will be displayed"
+    echo "                  Note: To filter by multiple strings, separate with '|' and wrap search term with"
+    echo "                        single quotes '"
+    echo "                  adb_utils -l tv.aio.android.launcher|glmorgan"
+    echo ""
     echo ""
 }
 
@@ -58,6 +65,15 @@ while [[ $# -gt 0 ]]; do
             exit
             ;;
     
+        -l|--log)
+            if [[ ! -z $2 ]]
+            then
+               tail -f | adb logcat | grep -E $2
+            else
+               tail -f | adb logcat
+            fi
+            exit
+            ;;
     esac
     
 done
