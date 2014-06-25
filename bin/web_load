@@ -20,32 +20,49 @@
 ##                 ./web_load.sh -p 12
 
 # BASE URLS
-JIRA_BASE_URL="http://jira.aio-tv.com/browse/PROD-"
-JIRA_AGILE_BOARD_URL="http://jira.aio-tv.com/secure/RapidBoard.jspa?rapidView=5&useStoredSettings=true"
+JIRA_BASE_URL="http://jira.aio-tv.com/browse/"
+JIRA_TICKET_PREFIX="PROD-"
 GITHUB_PULL_BASE_URL="https://github.com/aioTV/aioTV/pull/"
 GITHUB_BRANCH_BASE_URL="https://github.com/glmorgan/aioTV/tree"
 GITHUB_PULLS_BASE_URL="https://github.com/aioTV/aioTV/pulls"
 function usage() {
 echo "Usage: $0"
-
+echo ""
+echo "Base Urls:"
+echo ""
+echo "                  Please update the urls by editing the script file so they can point"
+echo "                  to the appropriate git fork/repo."
+echo ""
+echo "                  JIRA_BASE_URL=\"$JIRA_BASE_URL\""
+echo "                  JIRA_TICKET_PREFIX=\"$JIRA_TICKET_PREFIX\""
+echo "                  GITHUB_PULL_BASE_URL=\"$GITHUB_PULL_BASE_URL\""
+echo "                  GITHUB_BRANCH_BASE_URL=\"$GITHUB_BRANCH_BASE_URL\""
+echo "                  GITHUB_PULLS_BASE_URL=\"$GITHUB_PULLS_BASE_URL\""
+echo ""
+echo ""
 echo "Options:"
 echo ""
-echo "   -h, --help    Display this message."
+echo "   -h, --help     Display this message."
 echo ""
-echo "   -g            Load GitHub branch in browser "
-echo "                 param: branch name"
-echo "                 ./web_load.sh -g topic/PROD-123"
+echo "   -g             Load GitHub branch in browser "
+echo "                  param: branch name"
+echo "                  Note: If no param is supplied, the script will attempt to extract the current branch name."
+echo "                  ./web_load.sh -g topic/PROD-123"
 echo ""
-echo "   -j, --jira    Load Jira ticket"
-echo "                 param: ticket number"
-echo "                 ./web_load.sh -j PROD-123"
+echo "   -j, --jira     Load Jira ticket"
+echo "                  param: ticket number"
+echo "                  Note: If no param is supplied, the script will attempt to pull the ticket number"
+echo "                        from the current git branch name."
+echo "                  ./web_load.sh -j PROD-123"
 echo ""
-echo "   -p, --pulls   Load GitHub pull request"
-echo "                 param pull request number"
-echo "                 ./web_load.sh -p 12"
+echo "   -p, --pull     Load GitHub pull request"
+echo "                  param pull request number"
+echo "                  Note: If no param is supplied, all pulls for the repo will be displayed."
+echo "                  ./web_load.sh -p 12"
 echo ""
-echo "   -pu           Load user's GitHub pull request"
-echo "                 ./web_load.sh -pu glmorgan"
+echo "   -pu            Load user's GitHub pull request"
+echo "                  Note: If no param is supplied, all pulls for the repo will be displayed."
+echo "                  ./web_load.sh -pu glmorgan"
 echo ""
 echo ""
 }
@@ -60,9 +77,16 @@ while [[ $# -gt 0 ]]; do
         -j|--jira)
             if [[ ! -z $2 ]]
             then
-                load_url $JIRA_BASE_URL$2
+                load_url $JIRA_BASE_URL$JIRA_TICKET_PREFIX$2
             else
-                load_url $JIRA_AGILE_BOARD_URL
+                JIRA_TICKET=`git rev-parse --abbrev-ref HEAD | grep -oh "PROD-.*"`
+                if [[ ! -z $JIRA_TICKET ]]
+                then
+                    load_url $JIRA_BASE_URL$JIRA_TICKET
+                else
+                    usage
+                    echo "Missing ticket number"
+                fi
             fi
             exit
             ;;
