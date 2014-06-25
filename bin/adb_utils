@@ -6,6 +6,8 @@
 ## Desc: A couple utility commands that I tend to use often.
 
 PACKAGE_FILTER="aio"
+SCREEN_CAPTURE_FILENAME="adb_screen_capture"
+SCREEN_CAPTURE_EXTENSION="png"
 
 function usage() {
     echo "Usage: $0"
@@ -20,6 +22,12 @@ function usage() {
     echo "                  Note: If no param is supplied, the script will display all the \"$PACKAGE_FILTER\" packages."
     echo "                  adb_utils -p launcher"
     echo ""
+    echo "   -c, --capture  Save a screen capture"
+    echo "                  param: filename"
+    echo "                  Note: If no param is supplied, the script will save image as"
+    echo "                  \"$SCREEN_CAPTURE_FILENAME.$SCREEN_CAPTURE_EXTENSION\""
+    echo "                  adb_utils -c image.png"
+    echo ""
     echo ""
 }
 
@@ -29,7 +37,7 @@ while [[ $# -gt 0 ]]; do
             usage
             exit
             ;;
-        -p|-package)
+        -p|--package)
             if [[ ! -z $2 ]]
             then
                 PACKAGE_FILTER=$2
@@ -41,6 +49,15 @@ while [[ $# -gt 0 ]]; do
                 echo ""
             exit
             ;;
+        -c|--capture)
+            if [[ ! -z $2 ]]
+            then
+                SCREEN_CAPTURE_FILENAME=$2
+            fi
+            adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $SCREEN_CAPTURE_FILENAME.$SCREEN_CAPTURE_EXTENSION
+            exit
+            ;;
+    
     esac
-    shift
+    
 done
