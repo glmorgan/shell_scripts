@@ -6,36 +6,35 @@
 ## Desc: A couple utility commands that I tend to use often.
 
 PACKAGE_FILTER="aio"
-SCREEN_CAPTURE_FILENAME="adb_screen_capture"
-SCREEN_CAPTURE_EXTENSION="png"
+SCREEN_CAPTURE_FILENAME="adb_screen_capture.png"
 
 function usage() {
-    echo "Usage: $0"
-    echo ""
-    echo ""
-    echo "Options:"
-    echo ""
-    echo "   -h, --help     Display this message."
-    echo ""
-    echo "   -p, --package  Locate installed packages on connected Android device"
-    echo "                  param: package filter"
-    echo "                  Note: If no param is supplied, the script will display all the \"$PACKAGE_FILTER\" packages."
-    echo "                  adb_utils -p launcher"
-    echo ""
-    echo "   -c, --capture  Save a screen capture"
-    echo "                  param: filename"
-    echo "                  Note: If no param is supplied, the script will save image as"
-    echo "                  \"$SCREEN_CAPTURE_FILENAME.$SCREEN_CAPTURE_EXTENSION\""
-    echo "                  adb_utils -c image.png"
-    echo ""
-    echo "   -l, --log      Tail log files"
-    echo "                  param: filter expression"
-    echo "                  Note: If no param is supplied, all log entries will be displayed"
-    echo "                  Note: To filter by multiple strings, separate with '|' and wrap search term with"
-    echo "                        single quotes '"
-    echo "                  adb_utils -l tv.aio.android.launcher|glmorgan"
-    echo ""
-    echo ""
+echo "Usage: $0"
+echo ""
+echo ""
+echo "Options:"
+echo ""
+echo "   -h, --help     Display this message."
+echo ""
+echo "   -p, --package  Locate installed packages on connected Android device"
+echo "                  param: package filter"
+echo "                  Note: If no param is supplied, the script will display all the \"$PACKAGE_FILTER\" packages."
+echo "                  adb_utils -p launcher"
+echo ""
+echo "   -c, --capture  Save a screen capture"
+echo "                  param: filename"
+echo "                  Note: If no param is supplied, the script will save image as"
+echo "                  \"$SCREEN_CAPTURE_FILENAME\""
+echo "                  adb_utils -c image.png"
+echo ""
+echo "   -l, --log      Tail log files"
+echo "                  param: filter expression"
+echo "                  Note: If no param is supplied, all log entries will be displayed"
+echo "                  Note: To filter by multiple strings, separate with '|' and wrap search term with"
+echo "                        single quotes '"
+echo "                  adb_utils -l tv.aio.android.launcher|glmorgan"
+echo ""
+echo ""
 }
 
 while [[ $# -gt 0 ]]; do
@@ -49,11 +48,11 @@ while [[ $# -gt 0 ]]; do
             then
                 PACKAGE_FILTER=$2
             fi
-                echo "Executing command"
-                echo "\"adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2-\""
-                echo ""
-                adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2- 
-                echo ""
+            echo "Executing command"
+            echo "\"adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2-\""
+            echo ""
+            adb shell pm list packages -f | grep $PACKAGE_FILTER | cut -d= -f2- 
+            echo ""
             exit
             ;;
         -c|--capture)
@@ -61,20 +60,29 @@ while [[ $# -gt 0 ]]; do
             then
                 SCREEN_CAPTURE_FILENAME=$2
             fi
-            adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > $SCREEN_CAPTURE_FILENAME.$SCREEN_CAPTURE_EXTENSION
+            adb shell screencap -p | perl -pe 's/\x0D\x0A/\x0A/g' > "$SCREEN_CAPTURE_FILENAME"
+            
+            # Prompt user to view
+            echo "Screen captured saved as $SCREEN_CAPTURE_FILENAME"
+            read -p "Enter 'y' to view, 'n' to exit... " -n 1
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                 open "$SCREEN_CAPTURE_FILENAME"
+            fi
+
             exit
             ;;
-    
+
         -l|--log)
             if [[ ! -z $2 ]]
             then
-               tail -f | adb logcat | grep -E $2
+                tail -f | adb logcat | grep -E $2
             else
-               tail -f | adb logcat
+                tail -f | adb logcat
             fi
             exit
             ;;
     esac
-    
+
 done
 usage
