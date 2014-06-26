@@ -1,0 +1,127 @@
+#!/bin/bash
+
+## Author: Glen Morgan (glen.morgan@outlook.com)
+## Date: June 24th, 2014
+## Usage: qa_utils [option] arg 
+## Desc: Making QA's life easier, one shell script at a time.
+
+#Global variables
+JIRA_BASE_URL="http://jira.aio-tv.com/browse/"
+
+VAGRANT_URL="http://localhost:8080/"
+VAGRANT_QA_PATH="app/Test/"
+
+OUTPUT_PATH="aioWebsite/www/app/Test"
+OUTPUT_FILE="qa.html"
+
+function usage() {
+echo "Usage: $0"
+echo ""
+echo "Base Urls:"
+echo ""
+echo "                  Please update the urls by editing the script file so they can point"
+echo "                  to the appropriate git fork/repo."
+echo ""
+echo "                  JIRA_BASE_URL=\"$JIRA_BASE_URL\""
+echo ""
+echo ""
+echo "Options:"
+echo ""
+echo "   -h, --help     Display this message."
+echo ""
+echo "   -s, --setup    Setup branch info"
+echo "                  Note: View info at [serverlocation]/app/Test/qa.html"
+echo "                  qa_utils -s"
+echo ""
+echo ""
+}
+
+function load_url() {
+echo "Launching $1"
+/usr/bin/open $1
+}
+
+function git_last_log() {
+GIT_LOG=$(git log -1 --no-merges)
+}
+
+function git_branch_name {
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
+}
+
+function exportAsHTML {
+CONTENT_ARRAY=("${@}")
+
+HTML_OUTPUT="<html><head><title>QA Info</title></head><body>"
+HTML_OUTPUT="$HTML_OUTPUT <h3>Current Branch Information</h3><hr>"
+for i in "${CONTENT_ARRAY[@]}"
+do
+    HTML_OUTPUT="$HTML_OUTPUT<pre>$i</pre>"
+done
+
+HTML_OUTPUT="$HTML_OUTPUT<body><html>"
+
+# ensure output directory exists
+if [ ! -d "$OUTPUT_PATH" ]; then
+    echo "Please move to the root folder of the repo and re-execute command."
+    exit
+fi
+
+#Write to file
+echo "$HTML_OUTPUT" > "$OUTPUT_PATH/$OUTPUT_FILE"
+echo "QA info saved.  Run qa_utils -v to view in browser"
+}
+
+function extract_jira_ticket() {
+JIRA_TICKET=$(echo "$1" | grep -ohiE "PROD-[0-9]{0,5}" )
+
+# Convert to uppercase
+JIRA_TICKET=$(echo "$JIRA_TICKET" | tr '[:lower:]' '[:upper:]')
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -s|--setup)
+
+            # Declare output array
+            OUTPUT=()
+
+            # Extract the current branch
+            git_branch_name
+
+            OUTPUT+=("Branch Name: $CURRENT_BRANCH")
+
+            git_last_log
+            OUTPUT+=("$GIT_LOG")
+
+            extract_jira_ticket $CURRENT_BRANCH
+            if [ -n "$JIRA_TICKET" ]
+            then
+                OUTPUT+=("View Jira Ticket: <a href=\"$JIRA_BASE_URL$JIRA_TICKET\" target=\"_blank\">$JIRA_TICKET</a>")
+            fi
+            
+            #Save HTML to file
+            exportAsHTML "${OUTPUT[@]}"
+            exit
+            ;;
+        -v|--view)
+            echo "$OUTPUT_PATH/$OUTPUT_FILE"
+            if [ -f "$OUTPUT_PATH/$OUTPUT_FILE" ]
+            then
+                load_url "$VAGRANT_URL$VAGRANT_QA_PATH$OUTPUT_FILE"
+            else
+                usage
+                echo "$OUTPUT_FILE doesn't exist yet.  Please run with -s first"
+            fi
+            exit
+            ;;
+        -h|--help)
+            usage
+            exit
+            ;;
+
+    esac
+    shift
+done
+## no flags detected, show usage
+usage
