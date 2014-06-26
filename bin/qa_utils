@@ -75,7 +75,7 @@ echo "$HTML_OUTPUT" > "$OUTPUT_PATH/$OUTPUT_FILE"
 }
 
 function extract_jira_ticket() {
-JIRA_TICKET=$(echo "$1" | grep -ohiE "PROD-[0-9]{0,5}" )
+JIRA_TICKET=$(echo "$1" | grep -ohiE "DESIGN-[0-9]{0,5}|PROD-[0-9]{0,5}" )
 
 # Convert to uppercase
 JIRA_TICKET=$(echo "$JIRA_TICKET" | tr '[:lower:]' '[:upper:]')
