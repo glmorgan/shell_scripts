@@ -14,6 +14,8 @@ VAGRANT_QA_PATH="app/Test/"
 OUTPUT_PATH="aioWebsite/www/app/Test"
 OUTPUT_FILE="qa.html"
 
+GIT_LOG_ENTRIES=3
+
 function usage() {
 echo "Usage: $0"
 echo ""
@@ -42,7 +44,7 @@ echo "Launching $1"
 }
 
 function git_last_log() {
-GIT_LOG=$(git log -1 --no-merges)
+GIT_LOG=$(git log -$GIT_LOG_ENTRIES --no-merges)
 }
 
 function git_branch_name {
@@ -69,7 +71,7 @@ fi
 
 #Write to file
 echo "$HTML_OUTPUT" > "$OUTPUT_PATH/$OUTPUT_FILE"
-echo "QA info saved.  Run qa_utils -v to view in browser"
+
 }
 
 function extract_jira_ticket() {
@@ -91,17 +93,26 @@ while [[ $# -gt 0 ]]; do
 
             OUTPUT+=("Branch Name: $CURRENT_BRANCH")
 
-            git_last_log
-            OUTPUT+=("$GIT_LOG")
-
             extract_jira_ticket $CURRENT_BRANCH
             if [ -n "$JIRA_TICKET" ]
             then
                 OUTPUT+=("View Jira Ticket: <a href=\"$JIRA_BASE_URL$JIRA_TICKET\" target=\"_blank\">$JIRA_TICKET</a>")
             fi
             
+            git_last_log
+            OUTPUT+=("$GIT_LOG")
+
             #Save HTML to file
             exportAsHTML "${OUTPUT[@]}"
+
+            # Prompt user to view
+            read -p "QA branch info saved.  Enter 'y' to view, 'n' to exit... " -n 1
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo ""
+                load_url "$VAGRANT_URL$VAGRANT_QA_PATH$OUTPUT_FILE"    
+            fi
+
             exit
             ;;
         -v|--view)
