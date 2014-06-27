@@ -3,7 +3,7 @@
 ## Author: Glen Morgan (glen.morgan@outlook.com)
 ## Date: June 24th, 2014
 ## Usage: qa_utils [option] arg 
-## Desc: Making QA's life easier, one shell script at a time.
+## Desc: Making QA's setup simplier, one shell script at a time.
 
 #Global variables
 JIRA_BASE_URL="http://jira.aio-tv.com/browse/"
@@ -17,96 +17,99 @@ OUTPUT_FILE="qa.html"
 GIT_LOG_ENTRIES=3
 
 function usage() {
-echo "Usage: $0"
-echo ""
-echo "Base Urls:"
-echo ""
-echo "                  Please update the urls by editing the script file so they can point"
-echo "                  to the appropriate git fork/repo."
-echo ""
-echo "                  JIRA_BASE_URL=\"$JIRA_BASE_URL\""
-echo ""
-echo ""
-echo "Options:"
-echo ""
-echo "   -h, --help     Display this message."
-echo ""
-echo "   -s, --setup    Setup branch info"
-echo "                  Note: View info at [serverlocation]/app/Test/qa.html"
-echo "                  qa_utils -s"
-echo ""
-echo ""
+    echo "Usage: $0"
+    echo ""
+    echo "Options:"
+    echo ""
+    echo "   -h, --help     Display this message."
+    echo ""
+    echo "   -s, --setup    Setup branch info"
+    echo "                  Note: View info at [serverlocation]/app/Test/qa.html"
+    echo "                  qa_utils -s"
+    echo ""
+    echo "   -v, --view     View branch info"
+    echo "                  qa_utils -v"
+    echo ""
+    echo ""
 }
 
+# Launch the default browser with a supplied URL
 function load_url() {
-echo "Launching $1"
-/usr/bin/open $1
+url=$1
+    if [ -n "$url" ]
+    then
+        echo "Launching: $1"
+        /usr/bin/open $1
+    else
+        echo "Missing url!"
+    fi
 }
 
 function git_last_log() {
-GIT_LOG=$(git log -$GIT_LOG_ENTRIES --no-merges)
+    git_log=$(git log -$GIT_LOG_ENTRIES --no-merges)
 }
 
 function git_branch_name {
-CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
+    current_branch=$(git symbolic-ref --short HEAD)
 }
 
 function exportAsHTML {
-CONTENT_ARRAY=("${@}")
+    content_array=("${@}")
 
-HTML_OUTPUT="<html><head><title>QA Info</title></head><body>"
-HTML_OUTPUT="$HTML_OUTPUT <h3>Current Branch Information</h3><hr>"
-for i in "${CONTENT_ARRAY[@]}"
-do
-    HTML_OUTPUT="$HTML_OUTPUT<pre>$i</pre>"
-done
+    html_output="<html><head><title>QA Info</title></head><body>"
+    html_output="$html_output <h3>Current Branch Information</h3><hr>"
+    for i in "${content_array[@]}"
+    do
+        html_output="$html_output<pre>$i</pre>"
+    done
 
-HTML_OUTPUT="$HTML_OUTPUT<body><html>"
+    html_output="$html_output<body><html>"
 
-# ensure output directory exists
-if [ ! -d "$OUTPUT_PATH" ]; then
-    echo "Please move to the root folder of the repo and re-execute command."
-    exit
-fi
+    # ensure output directory exists
+    if [ ! -d "$OUTPUT_PATH" ]; then
+        echo "Please move to the root folder of the repo and re-execute command."
+        exit
+    fi
 
-#Write to file
-echo "$HTML_OUTPUT" > "$OUTPUT_PATH/$OUTPUT_FILE"
+    #Write to file
+    echo "$html_output" > "$OUTPUT_PATH/$OUTPUT_FILE"
 
 }
 
 function extract_jira_ticket() {
-JIRA_TICKET=$(echo "$1" | grep -ohiE "DESIGN-[0-9]{0,5}|PROD-[0-9]{0,5}" )
+    jira_ticket=$(echo "$1" | grep -ohiE "DESIGN-[0-9]{0,5}|PROD-[0-9]{0,5}" )
 
 # Convert to uppercase
-JIRA_TICKET=$(echo "$JIRA_TICKET" | tr '[:lower:]' '[:upper:]')
+    jira_ticket=$(echo "$jira_ticket" | tr '[:lower:]' '[:upper:]')
 }
 
+#getops parsing
 while [[ $# -gt 0 ]]; do
     case $1 in
         -s|--setup)
 
             # Declare output array
-            OUTPUT=()
+            output=()
 
-            # Extract the current branch
+            # Determine current git branch
             git_branch_name
+            output+=("Branch Name: $current_branch")
 
-            OUTPUT+=("Branch Name: $CURRENT_BRANCH")
-
-            extract_jira_ticket $CURRENT_BRANCH
-            if [ -n "$JIRA_TICKET" ]
+            # Determine Jira ticket number
+            extract_jira_ticket $current_branch
+            if [ -n "$jira_ticket" ]
             then
-                OUTPUT+=("View Jira Ticket: <a href=\"$JIRA_BASE_URL$JIRA_TICKET\" target=\"_blank\">$JIRA_TICKET</a>")
+                output+=("View Jira Ticket: <a href=\"$JIRA_BASE_URL$jira_ticket\" target=\"_blank\">$jira_ticket</a>")
             fi
             
             git_last_log
-            OUTPUT+=("$GIT_LOG")
+            output+=("$git_log")
 
             #Save HTML to file
-            exportAsHTML "${OUTPUT[@]}"
+            exportAsHTML "${output[@]}"
 
             # Prompt user to view
-            read -p "QA branch info saved.  Enter 'y' to view, 'n' to exit... " -n 1
+            read -p "QA branch info saved.  View file? ('y/n'):  " -n 1
 
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo ""
