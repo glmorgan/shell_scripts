@@ -1,0 +1,5 @@
+ShellScripts: Details about commit
+
+ - Implemented something
+  - something related to implementation
+ - misc: did something unreleated
