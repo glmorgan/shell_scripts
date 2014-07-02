@@ -1,0 +1,47 @@
+#!/bin/bash
+
+## Author: Glen Morgan (glen.morgan@outlook.com)
+## Date: June 24th, 2014
+## Usage: vagrant_utils [option] arg 
+## Desc: Optimize frequently used useful git commands.
+
+VAGRANT_BASE_URL="http://localhost:8080"
+
+function usage() {
+    echo "Usage: $0"
+    echo ""
+    echo "Options:"
+    echo ""
+    echo "   -h, --help        Display this message."
+    echo ""
+    echo "   -vs, --viewstash  View the contents of a stash"
+    echo "                     param: stash index"     
+    echo "                     git_utils -vs 0"
+    echo ""
+    echo ""
+}
+
+#getops parsing
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -vs|--viewstash)
+            index=$2
+            if [ ! $index ]
+            then
+                # Display the first item in the stash
+                index=0
+            fi
+            stash=$(git stash show -p stash@{$index};)
+            echo "$stash"
+            exit
+            ;;
+        -h|--help)
+            usage
+            exit
+            ;;
+
+    esac
+    shift
+done
+## no flags detected, show usage
+usage
