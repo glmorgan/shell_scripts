@@ -1,0 +1,71 @@
+#!/bin/bash
+
+## Author: Glen Morgan (glen.morgan@outlook.com)
+## Date: June 24th, 2014
+## Usage: vagrant_utils [option] arg 
+## Desc: Optimize frequently used vagrant functions.
+
+VAGRANT_BASE_URL="http://localhost:8080"
+
+function usage() {
+    echo "Usage: $0"
+    echo ""
+    echo "Options:"
+    echo ""
+    echo "   -h, --help     Display this message."
+    echo ""
+    echo "   -r, --restart  Restart vagrant service (mysql, www)"
+    echo "                  vagrant_utils -r mysql"
+    echo "                  vagrant_utils -r www"
+    echo ""
+    echo ""
+}
+
+# Launch the default browser with a supplied URL
+function load_url() {
+    url=$1
+    if [ -n "$url" ]
+    then
+        echo "Launching: $1"
+        /usr/bin/open $1
+    else
+        echo "Missing url!"
+    fi
+}
+
+#getops parsing
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -r|--restart)
+            service=$2
+            if [ ! $2 ]
+            then
+                usage
+                echo "Missing service to restart"
+            else
+                if [ "$service" == "www" ] || [ "$service" == "www1" ] 
+                then
+                    echo "Restarting Vagrant web server"
+                    result=$(vagrant ssh www1 -c "sudo /etc/init.d/httpd restart")
+                    echo "$result"
+                elif [ "$service" == "mysql" ] || [ "$service" == "mysql1" ]
+                then
+                    echo "Restarting Vagrant MySql"
+                    result=$(vagrant ssh mysql1 -c "sudo service mysql restart")
+                    echo "$result"
+                fi
+                echo "Restarting" 
+            fi
+
+            exit
+            ;;
+        -h|--help)
+            usage
+            exit
+            ;;
+
+    esac
+    shift
+done
+## no flags detected, show usage
+usage
