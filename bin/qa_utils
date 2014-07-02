@@ -11,8 +11,8 @@ JIRA_BASE_URL="http://jira.aio-tv.com/browse/"
 VAGRANT_URL="http://localhost:8080/"
 VAGRANT_QA_PATH="app/Test/"
 
-OUTPUT_PATH="aioWebsite/www/app/Test"
 OUTPUT_FILE="qa.html"
+OUTPUT_PATH="aioWebsite/www/app/Test"
 
 GIT_LOG_ENTRIES=3
 
