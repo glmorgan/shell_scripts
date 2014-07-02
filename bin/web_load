@@ -72,10 +72,10 @@ while [[ $# -gt 0 ]]; do
             then
                 load_url $JIRA_BASE_URL$JIRA_TICKET_PREFIX$2
             else
-                JIRA_TICKET=`git rev-parse --abbrev-ref HEAD | grep -oh "PROD-.*"`
-                if [[ ! -z $JIRA_TICKET ]]
+                jira_ticket=`git rev-parse --abbrev-ref HEAD | grep -oh "PROD-.*"`
+                if [[ ! -z $jira_ticket ]]
                 then
-                    load_url $JIRA_BASE_URL$JIRA_TICKET
+                    load_url $JIRA_BASE_URL$jira_ticket
                 else
                     usage
                     echo "Missing ticket number"
@@ -110,10 +110,10 @@ while [[ $# -gt 0 ]]; do
             then
                 load_url "$GITHUB_BRANCH_BASE_URL/$2"
             else
-                CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-                if [[ ! -z $CURRENT_BRANCH ]]
+                current_branch=`git rev-parse --abbrev-ref HEAD`
+                if [[ ! -z $current_branch ]]
                 then
-                    load_url "$GITHUB_BRANCH_BASE_URL/$CURRENT_BRANCH"
+                    load_url "$GITHUB_BRANCH_BASE_URL/$current_branch"
                 else
                     echo "Branch required!"
                 fi
