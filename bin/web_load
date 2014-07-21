@@ -14,7 +14,7 @@ GITHUB_BRANCH_BASE_URL="https://github.com/glmorgan/aioTV/tree"
 GITHUB_PULLS_BASE_URL="https://github.com/aioTV/aioTV/pulls"
 VAGRANT_BASE_URL="http://localhost:8080/"
 PHP_ADMIN="aiophpmadman"
-CONFLUENCE_BASE_URL="https://aio-tv.atlassian.net/wiki/"
+CONFLUENCE_BASE_URL="http://confluence.aio-tv.com/"
 CONFLUENCE_SEARCH="dosearchsite.action?queryString="
 function usage() {
     echo "Usage: $0"

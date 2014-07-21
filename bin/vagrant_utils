@@ -14,9 +14,12 @@ function usage() {
     echo ""
     echo "   -h, --help     Display this message."
     echo ""
-    echo "   -r, --restart  Restart vagrant service (mysql, www)"
+    echo "   -r, --restart  Restart vagrant service (mysql, www, both)"
     echo "                  vagrant_utils -r mysql"
     echo "                  vagrant_utils -r www"
+    echo ""
+    echo "   -l, --log      Tail vagrant error log"
+    echo "                  vagrant_utils -l "
     echo ""
     echo ""
 }
@@ -53,12 +56,23 @@ while [[ $# -gt 0 ]]; do
                     echo "Restarting Vagrant MySql"
                     result=$(vagrant ssh mysql1 -c "sudo service mysql restart")
                     echo "$result"
+                elif [ "$service" == "both" ]
+                then
+                    echo "Restarting Vagrant web server"
+                    result=$(vagrant ssh www1 -c "sudo /etc/init.d/httpd restart")
+                    echo "Restarting Vagrant MySql"
+                    result=$(vagrant ssh mysql1 -c "sudo service mysql restart")
+                    echo "$result"
                 fi
-                echo "Restarting" 
             fi
 
             exit
             ;;
+        -l|--log)
+            echo $(vagrant ssh www1 -c "sudo tail -f /var/log/httpd/www_error.log")
+            exit
+            ;;
+
         -h|--help)
             usage
             exit
