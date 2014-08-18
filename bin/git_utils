@@ -6,6 +6,7 @@
 ## Desc: Optimize frequently used useful git commands.
 
 VAGRANT_BASE_URL="http://localhost:8080"
+REMOTE_NAME="gmorgan"
 
 function usage() {
     echo "Usage: $0"
@@ -14,6 +15,9 @@ function usage() {
     echo ""
     echo "   -h, --help        Display this message."
     echo ""
+    echo "   -p, --push        Push current branch to fork"
+    echo "                     git_utils -p"
+    echo ""
     echo "   -vs, --viewstash  View the contents of a stash"
     echo "                     param: stash index"     
     echo "                     git_utils -vs 0"
@@ -21,7 +25,11 @@ function usage() {
     echo ""
 }
 
-#getops parsing
+function git_branch_name {
+    current_branch=$(git symbolic-ref --short HEAD)
+}
+ 
+ #getops parsing
 while [[ $# -gt 0 ]]; do
     case $1 in
         -vs|--viewstash)
@@ -33,6 +41,11 @@ while [[ $# -gt 0 ]]; do
             fi
             stash=$(git stash show -p stash@{$index};)
             echo "$stash"
+            exit
+            ;;
+        -p|--push)
+            git_branch_name
+            git push -u $REMOTE_NAME $current_branch        
             exit
             ;;
         -h|--help)
