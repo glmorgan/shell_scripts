@@ -34,6 +34,12 @@ echo "                  Note: To filter by multiple strings, separate with '|' a
 echo "                        single quotes '"
 echo "                  adb_utils -l tv.aio.android.launcher|glmorgan"
 echo ""
+echo "    -r, --remove  Remove a system installed apk"
+echo "                  This is used when removing firmware installed system apks"
+echo "                  If no apk is passed, you will be prompted for it"
+echo "                  usage: adb_utils -r Calendar.apk"
+echo "                  usage: adb_utils -r"
+echo ""
 echo ""
 }
 
@@ -82,6 +88,29 @@ while [[ $# -gt 0 ]]; do
             fi
             exit
             ;;
+        -r|--remove)
+            adb shell mount -o rw,remount ubi0_0 /system
+            if [[ ! -z $2 ]];
+            then
+                apk=$2
+            else
+                read -p "Enter name of apk: " $REPLY
+                if [[ $REPLY ]]; then
+                apk=$REPLY
+                fi
+            fi
+
+            if [ $apk ];
+            then
+                result=$(adb shell rm /system/app/$apk)
+                echo $result
+            else
+                echo "Now run the following command to uninstall the apk"
+                echo "adb shell rm /system/app/[name of apk].apk"
+            fi
+            exit
+            ;;
+
     esac
 
 done
