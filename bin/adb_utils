@@ -104,6 +104,13 @@ while [[ $# -gt 0 ]]; do
             then
                 result=$(adb shell rm /system/app/$apk)
                 echo $result
+                echo "Reboot required to complete uninstall"
+                read -n1 -p "Reboot now (y/n): " REBOOT 
+                if [[ $REBOOT =~ ^[Yy]$ ]]; then
+                    echo ""
+                    echo "Rebooting device..."
+                    adb reboot
+                fi
             else
                 echo "Now run the following command to uninstall the apk"
                 echo "adb shell rm /system/app/[name of apk].apk"
