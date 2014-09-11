@@ -14,13 +14,18 @@ function usage() {
     echo ""
     echo "   -h, --help     Display this message."
     echo ""
-    echo "   -r, --restart  Restart vagrant service (mysql, www, both)"
-    echo "                  vagrant_utils -r mysql"
-    echo "                  vagrant_utils -r www"
+    echo "   -i, --import   Import database sql file."
+    echo "                  vagrant_utils -i backup.sql"
     echo ""
     echo "   -l, --log      Tail vagrant error log"
     echo "                  vagrant_utils -l "
     echo ""
+    echo "   -r, --restart  Restart vagrant service (mysql, www, both)"
+    echo "                  vagrant_utils -r mysql"
+    echo "                  vagrant_utils -r www"
+    echo ""
+    echo "   -u, --update   Run the UpdateDB script"
+    echo "                  vagrant_utils -u"
     echo ""
 }
 
@@ -66,6 +71,24 @@ while [[ $# -gt 0 ]]; do
                 fi
             fi
 
+            exit
+            ;;
+        -i| --import)
+            if [ ! $2 ]
+            then
+                echo "Missing database sql file!"
+            else
+                DATABASE=$2
+                echo "Importing sql file '$DATABASE'..."
+                result=$(vagrant ssh mysql1 -c "mysql -uroot myaio < /vagrant/aioWebsite/database/$DATABASE")
+                echo $result
+            fi
+            exit
+            ;;
+        -u| --update)
+            echo "Updaing vagrant database..."
+            result=$(vagrant ssh mysql1 -c "source /opt/rh/php54/enable && php /vagrant/aioWebsite/database/UpdateDB.php -nb -l /vagrant/aioWebsite/www/")
+            echo $result
             exit
             ;;
         -l|--log)
